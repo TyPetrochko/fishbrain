@@ -1,7 +1,7 @@
 // FisheyeProject.cpp : Defines the entry point for the console application.
 //
 
-#include "stdafx.h"
+//#include "stdafx.h"
 #include <iostream>
 #include <fstream>	
 #include "opencv2/core/core.hpp"
@@ -113,10 +113,10 @@ void streamFisheyeConversion(){
 	cvDestroyWindow("Camera_Output"); //Destroy Window
 }
 
-int x_tmain(int argc, char** argv)
+int main(int argc, char** argv)
 {
 	//showimg(editimage(getcap()));
-	//streamFisheyeConversion();
+	streamFisheyeConversion();
 	//streamWebcam();
 	return 0;
 }

@@ -1,0 +1,11 @@
+1) Follow tutorial here http://docs.opencv.org/doc/tutorials/introduction/linux_install/linux_install.html
+2) To compile, use
+
+g++ -I/usr/local/include/opencv -I/usr/local/include/opencv2 -L/usr/local/lib/ -g -o binary  main.cpp -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_ml -lopencv_video -lopencv_features2d -lopencv_calib3d -lopencv_objdetect -lopencv_contrib -lopencv_legacy -lopencv_stitching
+
+(replace binary with name to output to)
+
+from http://answers.opencv.org/question/25642/how-to-compile-basic-opencv-program-in-c-in-ubuntu/
+
+
+3) If an error regarding location of OpenCV, look here: http://stackoverflow.com/questions/19164343/opencv-libopencv-core-so-2-4-cannot-open-shared-object-file-no-such-file-or
