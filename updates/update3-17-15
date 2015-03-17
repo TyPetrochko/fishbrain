@@ -1,0 +1,5 @@
+Migrated from Visual Studio to Unix, get set up with Makefile/OpenCV and put up Installation instructions.
+
+TODO:
+
+Make more documentation, and make the algorithm "circular" rather than horizontal (notice extreme stretching at top and bottom). Also I had to comment the "Include stdfax...etc" line, so figure that all out. Also there are some issues with the program randomly crashing.
