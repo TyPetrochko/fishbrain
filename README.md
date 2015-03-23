@@ -6,6 +6,7 @@ Using a fisheye camera and facial tracking to achieve "window-like" video chats,
 
 1) Follow tutorial here http://docs.opencv.org/doc/tutorials/introduction/linux_install/linux_install.html
 2) To compile, use 
+
     make fishbrain
 
 or the following..
