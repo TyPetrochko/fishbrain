@@ -5,6 +5,7 @@ Using a fisheye camera and facial tracking to achieve "window-like" video chats,
 ## Installation ##
 
 1) Follow tutorial here http://docs.opencv.org/doc/tutorials/introduction/linux_install/linux_install.html
+
 2) To compile, use 
 
     make fishbrain
@@ -17,7 +18,6 @@ In the above command, binary is the file you output to (in this case binary/fish
 
 For confusion, visit:
 http://answers.opencv.org/question/25642/how-to-compile-basic-opencv-program-in-c-in-ubuntu/
-
 
 3) If an error regarding location of OpenCV, look here: http://stackoverflow.com/questions/19164343/opencv-libopencv-core-so-2-4-cannot-open-shared-object-file-no-such-file-or
 
