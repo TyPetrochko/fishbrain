@@ -130,8 +130,8 @@ Mat sectionWarp(Mat src, float topHorizon, float bottomHorizon, float leftHorizo
 
     float height = src.rows;
     float width = src.cols;
-    int rad = (int) (height / 2.0f); // Assume circle fills to top of screen
-    int topOfScreen = (int) (height / 2.0f);
+    float rad = (height / 2.0f); // Assume circle fills to top of screen
+    float topOfScreen = (height / 2.0f);
     Mat toreturn = src.clone();
     for (int x = -(width/2.0f); x < (width/2.0f); x++){
 	int yMax;
@@ -141,25 +141,28 @@ Mat sectionWarp(Mat src, float topHorizon, float bottomHorizon, float leftHorizo
 	    int xMin;
 	    float relY = ((float) y)/(height/2.0f);
 	    float relX = ((float) x)/(width/2.0f);
-	    float newRad;
-	    if(abs(relY) > abs(relX)) {
-		newRad = abs(relY);
-	    } else {
-		newRad = abs(relX);
+	    float relativeRad;
+	    if(abs(relY)>abs(relX)){
+		relativeRad = abs(relY);
+	    }else{
+		relativeRad = abs(relX);
 	    }
-	    float xNew = newRad*(((float) rad)*relX)/(sqrt((relY*relY)+(relX*relX)));
-	    float yNew = newRad*(((float) rad)*relY)/(relX*sqrt((relX*relX + relY*relY)/(relX*relX)));
-	    yNew *= relX/(abs(relX));
+	    float xNew = rad*(((float) relativeRad)*relX)/(sqrt((relY*relY)+(relX*relX)));
+	    float yNew = rad*(((float) relativeRad)*relY)/(sqrt((relX*relX + relY*relY)));
+	    //xNew *= relativeRad;
+	    //yNew *= relativeRad;
+	    //yNew *= abs(relX)/relX;
 	    float yPix = yNew+(height/2.0f);
 	    float xPix = xNew+(width/2.0f); 
 	    //yPix = clamp(yPix, 0.0f, height/2.0f-1);
 	    //xPix = clamp(xPix, 0.0f, width/2.0f-1);
 	    int xPos = (int)((width/2.0f)+x);
 	    int yPos = (int)((height/2.0f)+y);
-	    //cout << relX << " " << relY << " " << width/2.0f << " " << height/2.0f << "\n";
+	    //cout << xNew << " " << yNew << " " << width/2.0f << " " << height/2.0f << "\n";
 	    if(yPix == yPix && xPix == xPix) {
-		toreturn.at<Vec3b>(yPix, xPix).val[1] = 0;
 		toreturn.at<Vec3b>(yPos, xPos) = src.at<Vec3b>(yPix, xPix);
+		//toreturn.at<Vec3b>(yPix, xPix).val[1] = 0;
+
 	    }
 	    // TODO make YMax, YMin the appropriate values, then use percentage along those points
 	}
