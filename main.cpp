@@ -18,9 +18,14 @@
 #include "opencv2/core/core_c.h"
 #include "opencv2/highgui/highgui_c.h"
 #include "opencv2/imgproc/imgproc_c.h"
+#include <math.h>
 
 using namespace std;
 using namespace cv;
+
+float clamp(float n, float lower, float upper){
+    return std::max(lower, std::min(n, upper));
+}
 
 Mat getcap() {
 	VideoCapture cap(0);
@@ -80,6 +85,88 @@ Mat editimage(Mat image){
 	return toreturn;
 }
 
+Mat drawequators(Mat image, float horizontalSpan, float verticalSpan){
+    // When horizontalSpan is 0, it draws a vertical line
+    // When horizontalSpan is some value between 0 and 1, it draws
+    // an equator somewhere between a vertical line and a full circle
+    // (essentially a "smushed" circle in the x-direction)
+
+    float height = image.rows;
+    float width = image.cols;
+    int rad = (int) (height / 2.0); // Assume circle fills to top of screen
+    int topOfScreen = (int) (height / 2.0);
+    //clone image to "toreturn" so we can modify them separately
+    Mat toreturn = image.clone();
+    for (int x = -rad; x < rad; x++){
+
+	float xcoord = (width/2.0)+x;
+	float ycoord = topOfScreen-sqrt(rad*rad-(x*x));
+	
+	float modifiedXcoord = (width/2.0)+horizontalSpan*x;
+	float modifiedYcoord = topOfScreen-verticalSpan*sqrt(rad*rad-(x*x));
+
+	image.at<Vec3b>(modifiedYcoord, xcoord).val[0] = 0;
+	image.at<Vec3b>(modifiedYcoord, xcoord).val[1] = 0;
+	image.at<Vec3b>(modifiedYcoord, xcoord).val[2] = 0;
+
+	image.at<Vec3b>(ycoord, modifiedXcoord).val[0] = 0;
+	image.at<Vec3b>(ycoord, modifiedXcoord).val[1] = 0;
+	image.at<Vec3b>(ycoord, modifiedXcoord).val[2] = 0;
+
+	image.at<Vec3b>(height-modifiedYcoord, xcoord).val[0] = 0;
+	image.at<Vec3b>(height-modifiedYcoord, xcoord).val[1] = 0;
+	image.at<Vec3b>(height-modifiedYcoord, xcoord).val[2] = 0;
+	
+	image.at<Vec3b>(height-ycoord, modifiedXcoord).val[0] = 0;
+	image.at<Vec3b>(height-ycoord, modifiedXcoord).val[1] = 0;
+	image.at<Vec3b>(height-ycoord, modifiedXcoord).val[2] = 0;
+
+    }
+    return toreturn;
+}
+
+Mat sectionWarp(Mat src, float topHorizon, float bottomHorizon, float leftHorizon, float rightHorizon){
+    // Think of each horizon as being one of the lines in drawequators
+
+    float height = src.rows;
+    float width = src.cols;
+    int rad = (int) (height / 2.0f); // Assume circle fills to top of screen
+    int topOfScreen = (int) (height / 2.0f);
+    Mat toreturn = src.clone();
+    for (int x = -(width/2.0f); x < (width/2.0f); x++){
+	int yMax;
+	int yMin;
+	for (int y = -(height/2.0f); y<(height/2.0f);y++){
+	    int xMax;
+	    int xMin;
+	    float relY = ((float) y)/(height/2.0f);
+	    float relX = ((float) x)/(width/2.0f);
+	    float newRad;
+	    if(abs(relY) > abs(relX)) {
+		newRad = abs(relY);
+	    } else {
+		newRad = abs(relX);
+	    }
+	    float xNew = newRad*(((float) rad)*relX)/(sqrt((relY*relY)+(relX*relX)));
+	    float yNew = newRad*(((float) rad)*relY)/(relX*sqrt((relX*relX + relY*relY)/(relX*relX)));
+	    yNew *= relX/(abs(relX));
+	    float yPix = yNew+(height/2.0f);
+	    float xPix = xNew+(width/2.0f); 
+	    //yPix = clamp(yPix, 0.0f, height/2.0f-1);
+	    //xPix = clamp(xPix, 0.0f, width/2.0f-1);
+	    int xPos = (int)((width/2.0f)+x);
+	    int yPos = (int)((height/2.0f)+y);
+	    //cout << relX << " " << relY << " " << width/2.0f << " " << height/2.0f << "\n";
+	    if(yPix == yPix && xPix == xPix) {
+		toreturn.at<Vec3b>(yPix, xPix).val[1] = 0;
+		toreturn.at<Vec3b>(yPos, xPos) = src.at<Vec3b>(yPix, xPix);
+	    }
+	    // TODO make YMax, YMin the appropriate values, then use percentage along those points
+	}
+    }
+    return toreturn;
+}
+
 void streamWebcam(){
 	cvNamedWindow("Camera_Output", 1);    //Create window
 	CvCapture* capture = cvCaptureFromCAM(CV_CAP_ANY);  //Capture using any camera connected to your system
@@ -102,7 +189,12 @@ void streamFisheyeConversion(){
 	while (1){ //Create infinte loop for live streaming
 		IplImage* frame = cvQueryFrame(capture); //Create image frames from capture
 		Mat toPass(frame);
-		imshow("Camera_Output", editimage(toPass));   //Show image frames on created window
+		//Mat edited = editimage(toPass);
+		//drawequators(toPass, .5, .75);
+		Size s = toPass.size();
+		if(s.width >0 && s.height > 0){
+		    imshow("Camera_Output", sectionWarp(toPass, -.5f, .5f, -.5f, .5f));   //Show image frames on created window
+		}
 
 		char key = cvWaitKey(10);     //Capture Keyboard stroke
 		if (key == 27){
