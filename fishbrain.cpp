@@ -138,65 +138,63 @@ Mat drawequators(Mat image, float horizontalSpan, float verticalSpan){
 }
 
 Mat sectionWarp(Mat src, float bottomHorizon, float topHorizon, float leftHorizon, float rightHorizon){
-    // Think of each horizon as being one of the lines in drawequators
+	// Think of each horizon as being one of the lines in drawequators
 
-    float height = src.rows;
-    float width = src.cols;
-    float rad = (height / 2.0f); // Assume circle fills to top of screen
-    
-    
-    
-    float topOfScreen = (height / 2.0f);
-    Mat toreturn = src.clone();
-    for (int x = -(width/2.0f); x < (width/2.0f); x++){
-	for (int y = -(height/2.0f); y<(height/2.0f);y++){
-		topHorizon = clamp(topHorizon, -1.0f, 1.0f);
-		bottomHorizon = clamp(bottomHorizon, -1.0f, 1.0f);
-		leftHorizon = clamp(leftHorizon, -1.0f, 1.0f);
-		rightHorizon = clamp(rightHorizon, -1.0f, 1.0f);
-		float relY = ((float) y)/(height/2.0f);
-		float relX = ((float) x)/(width/2.0f);
-		// Let's find the "relative" radius, i.e. if we drew a line from
-		// (0,0) to our current point, the continued drawing the line until
-		// you hit the edge of the viewing panel (rectangle), what percentage 
-		// would our point be at along that line?
-
-		// Let's figure out how we're going to "stretch" it
-		float yWeighted = (topHorizon + bottomHorizon)/2.0f - relY*(abs(topHorizon-bottomHorizon)/2.0f); 
-		float xWeighted = (leftHorizon + rightHorizon)/2.0f + relX*(abs(leftHorizon-rightHorizon)/2.0f); 
-		float relativeRad;
-		
-		if(abs(relY)>abs(relX)){
-		relativeRad = abs(relY);
-		}else{
-		relativeRad = abs(relX);
-		}
-		// Let's find x and y coords on a 0 to 1 scale, so IGNORING the radius
-		//float xNew = (((float) relativeRad)*xWeighted)/(sqrt((relY*relY)+(relX*relX)));
-		//float yNew = (((float) relativeRad)*relY)/(sqrt((relX*relX + relY*relY)));
-
-		float yNew = (abs(yWeighted)/yWeighted)*sqrt(abs((yWeighted*yWeighted-yWeighted*yWeighted*xWeighted*xWeighted)/(1-xWeighted*xWeighted*yWeighted*yWeighted)));
-		float xNew = xWeighted*(sqrt(abs(1-yNew*yNew)));
+	float height = src.rows;
+	float width = src.cols;
+	float rad = (height / 2.0f); // Assume circle fills to top of screen
 
 
-		// Now multiply by radius
-		xNew *= rad;
-		yNew *= rad;
 
-		// Now go to all positive coordinates (what we really use in OpenCV)
-		float yPix = (height/2.0f)-yNew;
-		float xPix = xNew+(width/2.0f); 
-		//yPix = clamp(yPix, 0.0f, height/2.0f-1);
-		//xPix = clamp(xPix, 0.0f, width/2.0f-1);
-		int xPos = (int)((width/2.0f)+x);
-		int yPos = (int)((height/2.0f)+y);
-		//cout << xWeighted << " " << yWeighted << "\n";
-		if(yPix == yPix && xPix == xPix && xPix >0 && yPix >0 && xPix <= width && yPix <= height) {
-			//toreturn.at<Vec3b>(yPos, xPos) = src.at<Vec3b>(yPix, xPix);
-			toreturn.at<Vec3b>(yPix, xPix).val[1] = 0;
-		}
-// TODO make YMax, YMin the appropriate values, then use percentage along those points
+	float topOfScreen = (height / 2.0f);
+	Mat toreturn = src.clone();
+	for (int x = -(width/2.0f); x < (width/2.0f); x++){
+		for (int y = -(height/2.0f); y<(height/2.0f);y++){
+			topHorizon = clamp(topHorizon, -1.0f, 1.0f);
+			bottomHorizon = clamp(bottomHorizon, -1.0f, 1.0f);
+			leftHorizon = clamp(leftHorizon, -1.0f, 1.0f);
+			rightHorizon = clamp(rightHorizon, -1.0f, 1.0f);
+			float relY = ((float) y)/(height/2.0f);
+			float relX = ((float) x)/(width/2.0f);
+			// Let's find the "relative" radius, i.e. if we drew a line from
+			// (0,0) to our current point, the continued drawing the line until
+			// you hit the edge of the viewing panel (rectangle), what percentage 
+			// would our point be at along that line?
 
+			// Let's figure out how we're going to "stretch" it
+			float yWeighted = (topHorizon + bottomHorizon)/2.0f - relY*(abs(topHorizon-bottomHorizon)/2.0f); 
+			float xWeighted = (leftHorizon + rightHorizon)/2.0f + relX*(abs(leftHorizon-rightHorizon)/2.0f); 
+			float relativeRad;
+
+			if(abs(relY)>abs(relX)){
+				relativeRad = abs(relY);
+			}else{
+				relativeRad = abs(relX);
+			}
+			// Let's find x and y coords on a 0 to 1 scale, so IGNORING the radius
+			//float xNew = (((float) relativeRad)*xWeighted)/(sqrt((relY*relY)+(relX*relX)));
+			//float yNew = (((float) relativeRad)*relY)/(sqrt((relX*relX + relY*relY)));
+
+			float yNew = (abs(yWeighted)/yWeighted)*sqrt(abs((yWeighted*yWeighted-yWeighted*yWeighted*xWeighted*xWeighted)/(1-xWeighted*xWeighted*yWeighted*yWeighted)));
+			float xNew = xWeighted*(sqrt(abs(1-yNew*yNew)));
+
+
+			// Now multiply by radius
+			xNew *= rad;
+			yNew *= rad;
+
+			// Now go to all positive coordinates (what we really use in OpenCV)
+			float yPix = (height/2.0f)-yNew;
+			float xPix = xNew+(width/2.0f); 
+			//yPix = clamp(yPix, 0.0f, height/2.0f-1);
+			//xPix = clamp(xPix, 0.0f, width/2.0f-1);
+			int xPos = (int)((width/2.0f)+x);
+			int yPos = (int)((height/2.0f)+y);
+			//cout << xWeighted << " " << yWeighted << "\n";
+			if(yPix == yPix && xPix == xPix && xPix >0 && yPix >0 && xPix <= width && yPix <= height) {
+				toreturn.at<Vec3b>(yPos, xPos) = src.at<Vec3b>(yPix, xPix);
+				//toreturn.at<Vec3b>(yPix, xPix).val[1] = 0;
+			}
 		}
 	}
     	return toreturn;
