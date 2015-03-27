@@ -20,10 +20,17 @@
 #include "opencv2/imgproc/imgproc_c.h"
 #include <math.h>
 
+#define ESCAPE_KEY (27)
+
 #define RIGHT_ARROW (83)
 #define LEFT_ARROW (81)
 #define UP_ARROW (82)
 #define DOWN_ARROW (84)
+
+#define TOP_HORIZON_INITIAL (.6f)
+#define BOTTOM_HORIZON_INITIAL (-.6f)
+#define LEFT_HORIZON_INITIAL (-.6f)
+#define RIGHT_HORIZON_INITIAL (.6f)
 
 using namespace std;
 using namespace cv;
@@ -185,8 +192,8 @@ Mat sectionWarp(Mat src, float bottomHorizon, float topHorizon, float leftHorizo
 		int yPos = (int)((height/2.0f)+y);
 		//cout << xWeighted << " " << yWeighted << "\n";
 		if(yPix == yPix && xPix == xPix && xPix >0 && yPix >0 && xPix <= width && yPix <= height) {
-			toreturn.at<Vec3b>(yPos, xPos) = src.at<Vec3b>(yPix, xPix);
-			//toreturn.at<Vec3b>(yPix, xPix).val[1] = 0;
+			//toreturn.at<Vec3b>(yPos, xPos) = src.at<Vec3b>(yPix, xPix);
+			toreturn.at<Vec3b>(yPix, xPix).val[1] = 0;
 		}
 // TODO make YMax, YMin the appropriate values, then use percentage along those points
 
@@ -232,8 +239,13 @@ void streamFisheyeConversion(){
 		
 		char key = cvWaitKey(10);     //Capture Keyboard stroke
 
-		if (key == 27){
+		if (key == ESCAPE_KEY){
 			break;
+		}else if (key == 'r') {
+			leftHorizon = LEFT_HORIZON_INITIAL;
+			rightHorizon = RIGHT_HORIZON_INITIAL;
+			topHorizon = TOP_HORIZON_INITIAL;
+			bottomHorizon = BOTTOM_HORIZON_INITIAL;
 		}else if (key == LEFT_ARROW || key == RIGHT_ARROW || key == UP_ARROW || key == DOWN_ARROW){
 			// Weight how far they move based upon how far they are from the center of the screen
 			// i.e. when you're farther away, you only move a little...
