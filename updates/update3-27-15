@@ -1,0 +1,15 @@
+We have a working prototype!
+
+Accomplished:
+-can now start the program (assuming cam is properly oriented) and display as a rectilinear scene
+-can "pan" rectilinear view-frame via arrow keys
+-<escape> ends program, <arrow keys> pan, and <r> resets viewframe
+
+
+TODO:
+-make panning with arrow keys smoother (holding them down is glitchy and weird)
+-get a working facial recognition demo
+-coordinate facial recognition demo to work with fisheye view
+-link facial recognition program to rectilinear viewframe
+-create in/out panning via perceived eye distance (i.e. how far the user is from the camera)
+-create a "orientation" phase at the beginning, that shows you where to put the fisheye (no warping), adjusts radius, and tells you when it's correctly placed
