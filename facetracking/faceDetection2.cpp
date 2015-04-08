@@ -5,17 +5,13 @@
 #include "opencv2/objdetect/objdetect.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include <math.h>
+#include "faceDetection2.hpp"
 #include <iostream>
 #include <stdio.h>
 
 using namespace std;
 using namespace cv;
 
-/** Function Headers */
-void detectAndDisplay( Mat frame );
-
-/** Function Headers */
-void detectAndDisplay( Mat frame );
 
 /** Global variables */
 String face_cascade_name = "lbpcascade_frontalface.xml";
@@ -60,7 +56,7 @@ int main( void )
 /**
  * @function detectAndDisplay
  */
-void detectAndDisplay( Mat frame )
+void detectAndDisplay( Mat frame, float *x, float *y )
 {
     std::vector<Rect> faces;
     Mat frame_gray;
@@ -86,7 +82,9 @@ void detectAndDisplay( Mat frame )
 	    float relativeX, relativeY;
 	    relativeX = (center.x-(frame.cols/2.0))/(frame.cols/2.0);
 	    relativeY = ((frame.rows/2.0)-center.y)/(frame.rows/2.0);
-	    cout << relativeX << " x " << relativeY << '\n';
+	    *x = relativeX;
+	    *y = relativeY;
+	    //cout << relativeX << " x " << relativeY << '\n';
             for( size_t j = 0; j < eyes.size(); j++ )
             { //-- Draw the eyes
                 Point eye_center( faces[i].x + eyes[j].x + eyes[j].width/2, faces[i].y + eyes[j].y + eyes[j].height/2 );
