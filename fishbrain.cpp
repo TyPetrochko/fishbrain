@@ -19,6 +19,7 @@
 #include "opencv2/highgui/highgui_c.h"
 #include "opencv2/imgproc/imgproc_c.h"
 #include <math.h>
+#include "facetracking/faceDetection2.hpp"
 
 #define ESCAPE_KEY (27)
 

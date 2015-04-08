@@ -22,6 +22,8 @@ String window_name = "Capture - Face detection";
 /**
  * @function main
  */
+
+#ifdef DEBUG
 int main( void )
 {
     VideoCapture capture;
@@ -43,8 +45,9 @@ int main( void )
             break;
         }
 
-        //-- 3. Apply the classifier to the frame
-        detectAndDisplay( frame );
+        float x, y;
+	//-- 3. Apply the classifier to the frame
+        detectAndDisplay( frame, &x, &y );
 
         //-- bail out if escape was pressed
         int c = waitKey(10);
@@ -52,7 +55,7 @@ int main( void )
     }
     return 0;
 }
-
+#endif
 /**
  * @function detectAndDisplay
  */

@@ -1,2 +1,2 @@
 /** Function Headers */
-void detectAndDisplay( Mat frame );
+void detectAndDisplay(cv::Mat frame, float *, float *);
