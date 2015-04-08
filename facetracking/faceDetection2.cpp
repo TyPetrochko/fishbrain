@@ -83,7 +83,10 @@ void detectAndDisplay( Mat frame )
             //-- Draw the face
             Point center( faces[i].x + faces[i].width/2, faces[i].y + faces[i].height/2 );
             ellipse( frame, center, Size( faces[i].width/2, faces[i].height/2 ), 0, 0, 360, Scalar( 255, 0, 0 ), 2, 8, 0 );
-
+	    float relativeX, relativeY;
+	    relativeX = (center.x-(frame.cols/2.0))/(frame.cols/2.0);
+	    relativeY = ((frame.rows/2.0)-center.y)/(frame.rows/2.0);
+	    cout << relativeX << " x " << relativeY << '\n';
             for( size_t j = 0; j < eyes.size(); j++ )
             { //-- Draw the eyes
                 Point eye_center( faces[i].x + eyes[j].x + eyes[j].width/2, faces[i].y + eyes[j].y + eyes[j].height/2 );
