@@ -1,0 +1,5 @@
+
+
+## First milestone! ##
+
+We now have a working prototype with a manual and facetracking mode! In facetracking mode, the camera pans to follow your face, but we can reverse the direction of this such that you can look "around" the room. Optimization and code-cleanup to come!
