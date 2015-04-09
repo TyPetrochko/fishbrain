@@ -1,2 +1,3 @@
 /** Function Headers */
-void detectAndDisplay(cv::Mat frame, float *, float *);
+void detectFaces(cv::Mat frame, float *, float *, int);
+void initFaceDetection();

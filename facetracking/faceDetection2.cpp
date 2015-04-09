@@ -9,6 +9,7 @@
 #include <iostream>
 #include <stdio.h>
 
+
 using namespace std;
 using namespace cv;
 
@@ -22,6 +23,8 @@ String window_name = "Capture - Face detection";
 /**
  * @function main
  */
+
+
 
 #ifdef DEBUG
 int main( void )
@@ -47,7 +50,7 @@ int main( void )
 
         float x, y;
 	//-- 3. Apply the classifier to the frame
-        detectAndDisplay( frame, &x, &y );
+        detectFaces( frame, &x, &y, true);
 
         //-- bail out if escape was pressed
         int c = waitKey(10);
@@ -59,7 +62,13 @@ int main( void )
 /**
  * @function detectAndDisplay
  */
-void detectAndDisplay( Mat frame, float *x, float *y )
+
+void initFaceDetection(){
+    if( !face_cascade.load( face_cascade_name ) ){ printf("--(!)Error loading face cascade\n");};
+    if( !eyes_cascade.load( eyes_cascade_name ) ){ printf("--(!)Error loading eyes cascade\n");};
+	
+}
+void detectFaces( Mat frame, float *x, float *y, int display)
 {
     std::vector<Rect> faces;
     Mat frame_gray;
@@ -69,34 +78,35 @@ void detectAndDisplay( Mat frame, float *x, float *y )
 
     //-- Detect faces
     face_cascade.detectMultiScale( frame_gray, faces, 1.1, 2, 0, Size(80, 80) );
-
+    puts("Detecting faces ");
     for( size_t i = 0; i < faces.size(); i++ )
     {
+	puts("Found one");
         Mat faceROI = frame_gray( faces[i] );
         std::vector<Rect> eyes;
 
         //-- In each face, detect eyes
         eyes_cascade.detectMultiScale( faceROI, eyes, 1.1, 2, 0 |CASCADE_SCALE_IMAGE, Size(30, 30) );
-        if( eyes.size() == 2)
-        {
+        //if( eyes.size() == 2)
+        if(1)
+	{
             //-- Draw the face
             Point center( faces[i].x + faces[i].width/2, faces[i].y + faces[i].height/2 );
-            ellipse( frame, center, Size( faces[i].width/2, faces[i].height/2 ), 0, 0, 360, Scalar( 255, 0, 0 ), 2, 8, 0 );
+            if (display) {ellipse( frame, center, Size( faces[i].width/2, faces[i].height/2 ), 0, 0, 360, Scalar( 255, 0, 0 ), 2, 8, 0 );}
 	    float relativeX, relativeY;
 	    relativeX = (center.x-(frame.cols/2.0))/(frame.cols/2.0);
 	    relativeY = ((frame.rows/2.0)-center.y)/(frame.rows/2.0);
 	    *x = relativeX;
 	    *y = relativeY;
-	    //cout << relativeX << " x " << relativeY << '\n';
             for( size_t j = 0; j < eyes.size(); j++ )
             { //-- Draw the eyes
-                Point eye_center( faces[i].x + eyes[j].x + eyes[j].width/2, faces[i].y + eyes[j].y + eyes[j].height/2 );
-                int radius = cvRound( (eyes[j].width + eyes[j].height)*0.25 );
-                circle( frame, eye_center, radius, Scalar( 255, 0, 255 ), 3, 8, 0 );
+                //Point eye_center( faces[i].x + eyes[j].x + eyes[j].width/2, faces[i].y + eyes[j].y + eyes[j].height/2 );
+                //int radius = cvRound( (eyes[j].width + eyes[j].height)*0.25 );
+                //circle( frame, eye_center, radius, Scalar( 255, 0, 255 ), 3, 8, 0 );
             }
         }
 
     }
     //-- Show what you got
-    imshow( window_name, frame );
+    if (display) {imshow( window_name, frame );}
 }

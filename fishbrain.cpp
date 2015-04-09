@@ -33,6 +33,9 @@
 #define LEFT_HORIZON_INITIAL (-.6f)
 #define RIGHT_HORIZON_INITIAL (.6f)
 
+#define MANUAL_MODE (0)
+#define FACE_TRACKING_MODE (1)
+
 using namespace std;
 using namespace cv;
 
@@ -217,7 +220,8 @@ void streamWebcam(){
 	cvDestroyWindow("Camera_Output"); //Destroy Window
 }
 
-void streamFisheyeConversion(){
+void streamFisheyeConversion(int controlMode){
+	initFaceDetection();
 	cvNamedWindow("Camera_Output", 1);    //Create window
 	CvCapture* capture = cvCaptureFromCAM(CV_CAP_ANY);  //Capture using any camera connected to your system
 	float bottomHorizon, topHorizon, leftHorizon, rightHorizon;
@@ -226,11 +230,14 @@ void streamFisheyeConversion(){
 	leftHorizon = -.6f;
 	rightHorizon = .6f;
 
+	// Where to focus horizontally left and right
+	float focusX = 0.0;
+	float focusY = 0.0;
 	while (1){ //Create infinte loop for live streaming
 		IplImage* frame = cvQueryFrame(capture); //Create image frames from capture
 		Mat toPass(frame);
-		//Mat edited = editimage(toPass);
-		//drawequators(toPass, .5, .75);
+		detectFaces(sectionWarp(toPass, BOTTOM_HORIZON_INITIAL, TOP_HORIZON_INITIAL, LEFT_HORIZON_INITIAL, RIGHT_HORIZON_INITIAL), &focusX, &focusY, false);
+		cout << focusX << " x " << focusY << "\n";
 		Size s = toPass.size();
 		if(s.width >0 && s.height > 0){
 		    imshow("Camera_Output", sectionWarp(toPass, bottomHorizon, topHorizon, leftHorizon, rightHorizon));   //Show image frames on created window
@@ -240,41 +247,58 @@ void streamFisheyeConversion(){
 
 		if (key == ESCAPE_KEY){
 			break;
-		}else if (key == 'r') {
-			leftHorizon = LEFT_HORIZON_INITIAL;
-			rightHorizon = RIGHT_HORIZON_INITIAL;
-			topHorizon = TOP_HORIZON_INITIAL;
-			bottomHorizon = BOTTOM_HORIZON_INITIAL;
-		}else if (key == LEFT_ARROW || key == RIGHT_ARROW || key == UP_ARROW || key == DOWN_ARROW){
-			// Weight how far they move based upon how far they are from the center of the screen
-			// i.e. when you're farther away, you only move a little...
-			float amtToMoveL = 1.0f - abs(leftHorizon);
-			float amtToMoveR = 1.0f - abs(rightHorizon);
-			float amtToMoveU = 1.0f - abs(topHorizon);
-			float amtToMoveD = 1.0f - abs(bottomHorizon);
-
-			switch  (key) {
-				case LEFT_ARROW: leftHorizon -= amtToMoveL/8.0f;
-						 rightHorizon -= amtToMoveR/8.0f;
-						 break; // TODO FINISH THIS
-				case RIGHT_ARROW: leftHorizon += amtToMoveL/8.0f;
-						  rightHorizon += amtToMoveR/8.0f;
-						  break;
-				case UP_ARROW: topHorizon += amtToMoveU/8.0f;
-					       bottomHorizon += amtToMoveD/8.0f;
-					       break;
-				case DOWN_ARROW: topHorizon -= amtToMoveU/8.0f;
-						 bottomHorizon -= amtToMoveD/8.0f;
-						 break;
-			}
-			//bottomHorizon += amtToMoveD/8.0f;
-			//topHorizon += amtToMoveU/8.0f;
-			//leftHorizon += amtToMoveL/8.0f;
-			//rightHorizon += amtToMoveR/8.0f;
-			cout << "MOVING\n";
-		}else {
-			cout << (int)key << '\n';
 		}
+		if(controlMode == MANUAL_MODE){
+			if (key == 'r') {
+				focusX = 0.0;
+				focusY = 0.0;
+				/*
+				leftHorizon = LEFT_HORIZON_INITIAL;
+				rightHorizon = RIGHT_HORIZON_INITIAL;
+				topHorizon = TOP_HORIZON_INITIAL;
+				bottomHorizon = BOTTOM_HORIZON_INITIAL;
+				*/
+			}else if (key == LEFT_ARROW || key == RIGHT_ARROW || key == UP_ARROW || key == DOWN_ARROW){
+				// Weight how far they move based upon how far they are from the center of the screen
+				// i.e. when you're farther away, you only move a little...
+				/*
+				float amtToMoveL = 1.0f - abs(leftHorizon);
+				float amtToMoveR = 1.0f - abs(rightHorizon);
+				float amtToMoveU = 1.0f - abs(topHorizon);
+				float amtToMoveD = 1.0f - abs(bottomHorizon);
+				*/
+
+				switch  (key) {
+					case LEFT_ARROW: //leftHorizon -= amtToMoveL/8.0f;
+							 //rightHorizon -= amtToMoveR/8.0f;
+							 focusX += .2*(-1.0-focusX);
+							 
+							 break; // TODO FINISH THIS
+					case RIGHT_ARROW: //leftHorizon += amtToMoveL/8.0f;
+							  //rightHorizon += amtToMoveR/8.0f;
+							  focusX += .2*(1.0-focusX);
+							  break;
+					case UP_ARROW: //topHorizon += amtToMoveU/8.0f;
+						       //bottomHorizon += amtToMoveD/8.0f;
+						       focusY += .2*(1.0-focusY);
+						       break;
+					case DOWN_ARROW: //topHorizon -= amtToMoveU/8.0f;
+							 //bottomHorizon -= amtToMoveD/8.0f;
+							focusY += .2*(-1.0-focusY);
+							break;
+				}
+				cout << "MOVING\n";
+			}else {
+				cout << (int)key << '\n';
+			}
+		}
+		float offsetX  = (1.0 - abs(focusX))/2.0;
+		float offsetY  = (1.0 - abs(focusY))/2.0;
+		leftHorizon = focusX-offsetX;
+		rightHorizon = focusX+offsetX;
+		topHorizon = focusY+offsetY;
+		bottomHorizon = focusY-offsetY;
+
 	}
 	cvReleaseCapture(&capture); //Release capture.
 	cvDestroyWindow("Camera_Output"); //Destroy Window
@@ -283,7 +307,7 @@ void streamFisheyeConversion(){
 int main(int argc, char** argv)
 {
 	//showimg(editimage(getcap()));
-	streamFisheyeConversion();
+	streamFisheyeConversion(FACE_TRACKING_MODE);
 	//streamWebcam();
 	return 0;
 }
