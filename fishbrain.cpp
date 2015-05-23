@@ -1,7 +1,3 @@
-// FisheyeProject.cpp : Defines the entry point for the console application.
-//
-
-//#include "stdafx.h"
 #include <iostream>
 #include <fstream>	
 #include "opencv2/core/core.hpp"
@@ -304,10 +300,123 @@ void streamFisheyeConversion(int controlMode){
 	cvDestroyWindow("Camera_Output"); //Destroy Window
 }
 
+void mirror(int controlMode){
+    // Load in initial files
+    initFaceDetection();
+    cvNamedWindow("Camera_Output", 1); // create window
+    CvCapture* capture = cvCaptureFromCAM(CV_CAP_ANY); // capture using any camera connected to your system
+    
+    // Initial values
+    float searchBottomHorizon;
+    float searchTopHorizon;
+    float searchLeftHorizon;
+    float searchRightHorizon;
+    
+    float focusBottomHorizon;
+    float focusTopHorizon;
+    float focusLeftHorizon;
+    float focusRightHorizon;
+
+    // Where to focus the camera output horizontally left and right, on a scale -1.0 to 1.0
+    float focusX = 0.0;
+    float focusY = 0.0;
+
+    // Where to search for face in fisheye frame
+    float searchX = 0.0;
+    float searchY = 0.0;
+
+    // Where the face is in the given search frame
+    float faceX;
+    float faceY;
+
+    while (1){ 
+	// Convert focal point to horizons
+	float searchOffsetX  = (1.0 - abs(searchX))/1.3;
+	float searchOffsetY  = (1.0 - abs(searchY))/1.3;
+	
+	searchLeftHorizon = searchX - searchOffsetX;
+	searchRightHorizon = searchX + searchOffsetX;
+	searchTopHorizon = searchY + searchOffsetY;
+	searchBottomHorizon = searchY - searchOffsetY;
+	
+	// Take a picture, and convert to Mat
+	IplImage* frame = cvQueryFrame(capture);
+	Mat toPass(frame);	
+	
+	// Give faceX and faceY a dummy value to test if they are set
+	faceX = faceY = 2.0;
+
+	// Figure out where the face is - set to faceX and faceY
+	detectFaces(sectionWarp(toPass, searchBottomHorizon, searchTopHorizon, searchLeftHorizon, searchRightHorizon), &faceX, &faceY, false);
+	
+	if (faceX == 2.0 && faceY == 2.0){
+	    searchX = searchY = 0.0;
+	}else {
+	    // Based on where the faces are in the given frame, adjust where to focus camera
+	    searchX += .25 * faceX;
+	    searchY += .25 * faceY;
+	}
+	
+	// If we're very close to the the face or not moving far, show it
+	float dist = sqrt((focusX - searchX)*(focusX - searchX) + (focusY - searchY)*(focusY - searchY));
+	if((faceX < .2 && faceY < .2) || dist < .05){
+	    // searchX and searchY are the correct coordinates, so linear interpolate there
+	    // TODO optimize this by doing it in a power of eight, then shift instead of dividing
+	    focusX = (3*focusX + searchX)/4.0;
+	    focusY = (3*focusY + searchY)/4.0;
+	    
+	    // Convert focal point to horizons
+	    float focusOffsetX  = (1.0 - abs(focusX))/2.0;
+	    float focusOffsetY  = (1.0 - abs(focusY))/2.0;
+	    
+	    focusLeftHorizon = focusX - focusOffsetX;
+	    focusRightHorizon = focusX + focusOffsetX;
+	    focusTopHorizon = focusY + focusOffsetY;
+	    focusBottomHorizon = focusY - focusOffsetY;
+	    
+	}
+
+	// If getting weird glitches, check that height and width of s are positive
+	imshow("Camera_Output", sectionWarp(toPass, focusBottomHorizon, focusTopHorizon, focusLeftHorizon, focusRightHorizon));   //Show image frames on created window
+	
+	char key = cvWaitKey(10);     //Capture Keyboard stroke
+
+	if (key == ESCAPE_KEY){
+		break;
+	}
+	
+	if(controlMode == MANUAL_MODE){
+	    if (key == 'r') {
+		focusX = 0.0;
+		focusY = 0.0;
+	    }else if (key == LEFT_ARROW || key == RIGHT_ARROW || key == UP_ARROW || key == DOWN_ARROW){
+		// Weight how far they move based upon how far they are from the center of the screen
+		// i.e. when you're farther away, you only move a little...
+		switch  (key) {
+			case LEFT_ARROW:	focusX += .2*(-1.0-focusX);
+					    break; 
+			case RIGHT_ARROW:	focusX += .2*(1.0-focusX);
+					    break;
+			case UP_ARROW:	focusY += .2*(1.0-focusY);
+					    break;
+			case DOWN_ARROW:	focusY += .2*(-1.0-focusY);
+					    break;
+		}
+		cout << "MOVING\n";
+	    }else {
+		cout << (int)key << '\n';
+	    }
+	}
+    }
+    cvReleaseCapture(&capture); //Release capture.
+    cvDestroyWindow("Camera_Output"); //Destroy Window
+}
+
+
 int main(int argc, char** argv)
 {
-	//showimg(editimage(getcap()));
-	streamFisheyeConversion(FACE_TRACKING_MODE);
-	//streamWebcam();
-	return 0;
+    //streamFisheyeConversion(FACE_TRACKING_MODE);
+    mirror(FACE_TRACKING_MODE);
+    return 0;
+
 }
