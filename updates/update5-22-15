@@ -1,0 +1,18 @@
+Big new update for fishbrain!
+
+Implemented a new face-tracking feature that works like so.
+
+Two cameras are constantly in action. Camera A is always looking for the user's face, while Camera B is streaming to the user. When Camera A knows that it's tracking the user, Camera B "follows" it smoothly (via a 75% linear interpolation). As soon as Camera A "loses track" of the user's face, Camera B remains where it is while Camera A goes back to the middle to look for the user's face again. As soon as it finds it, it "hones in" and, once Camera A has gotten close enough to the user's face, Camera B swivels to match Camera A and begins following it once again.
+
+Pretty cool, right? Camera A has a wider viewing angle, so it's better at "finding" while Camera B has a more videochat-friendly field of view.
+
+There are still some bugs to work out, and optimizing this could potentially take a while. With luck, it will be mostly the concious-coding type optimization and less the nitty-gritty stuff (cache optimization? unrolling loops? ick...).
+
+TODO
+-clean up fishbrain.cpp and document a little better
+-optimize the section warp method in fishbrain.cpp
+
+
+Bigger Plans for the future!
+-networking and command-line functionality
+-GUI GUI GUI!
