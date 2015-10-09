@@ -2,7 +2,7 @@
 
 Using a fisheye camera and facial tracking to achieve "window-like" video chats, where either party can move his/her head to glance around the opposite party's room.
 
-Check out [Fishbrain Section](#Fishbrain)
+Check out [Fishbrain Section](#fishbrain)
 
 ## Installation ##
 
@@ -64,7 +64,7 @@ Here are my next few goals:
 
 1) Refractor/comment algorithm.
 2) Speed up the algorithm. Since it uses a whole bunch of matrix transformations, [cache optimization](http://www.cc.gatech.edu/~bader/COURSES/UNM/ece637-Fall2003/papers/KW03.pdf) might make a huge difference.
-3) Build [networking portion](#Networking).
+3) Build [networking portion](#networking).
 
 ## Networking ##
 
