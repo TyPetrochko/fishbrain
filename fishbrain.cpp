@@ -362,8 +362,8 @@ void mirror(int controlMode){
 	if((faceX < .2 && faceY < .2) || dist < .05){
 	    // searchX and searchY are the correct coordinates, so linear interpolate there
 	    // TODO optimize this by doing it in a power of eight, then shift instead of dividing
-	    focusX = (3*focusX + searchX)/4.0;
-	    focusY = (3*focusY + searchY)/4.0;
+	    focusX = (3*focusX + -searchX)/4.0;
+	    focusY = (3*focusY + -searchY)/4.0;
 	    
 	    // Convert focal point to horizons
 	    float focusOffsetX  = (1.0 - abs(focusX))/2.0;
