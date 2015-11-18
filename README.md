@@ -25,7 +25,7 @@ http://answers.opencv.org/question/25642/how-to-compile-basic-opencv-program-in-
 
 ## Running ##
 
-To run this program, attack a fisheye camera to your webcam (make sure it's centered), navigate to binary folder, and type:
+To run this program, attach a fisheye camera to your webcam (make sure it's centered), navigate to binary folder, and type:
 
     ./fishbrain
 
