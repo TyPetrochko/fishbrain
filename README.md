@@ -1,4 +1,4 @@
-# Fisheye Project #
+# Fishbrain #
 
 Using a fisheye camera and facial tracking to achieve "window-like" video chats, where either party can move his/her head to glance around the opposite party's room.
 
